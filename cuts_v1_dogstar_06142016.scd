@@ -15,7 +15,7 @@ s.boot;
 
 /* !!!!!!!!!! PUT YOUR SAMPLE'S FILEPATH IN ~bSamp (noisey or wind interferency samples work well, tone oriented stuff not so much!)*/
 
-~bSamp = Buffer.read(s, "/Volumes/MROTHERBACKUP/samples/westinBonaventureFountains.aif", action: { "sample read".postln });
+~bSamp = Buffer.read(s, "/Volumes/MROTHERBACKUP/samples/elevatorMono.aif", action: { "sample read".postln });
 
 ~fft_b1 = Buffer.alloc( s, 2048, 1, completionMessage: { "fft_b1 alloced".postln });
 ~fft_b2 = Buffer.alloc( s, 2048, 1, completionMessage: { "fft_b2 alloced".postln });
@@ -67,17 +67,23 @@ SynthDef( \scramble, { | amp = 0.0, cwipe, cwidth, dur = 2, freq = 1.0, glide = 
 // the audio bus
 ~bus = Bus.audio(s, 1 );
 
+// wet synth controls
+~dbAmp = Bus.control(s, 1).set(0.0);
+~dbDelaytime = Bus.control(s, 1).set(2);
+~dbTrig = Bus.control(s, 1).set(1);
+
+// choppy control busses
+~sAmp = Bus.control(s, 1).set(0.0);
+~sDur = Bus.control(s, 1).set(1.0);
+~sFreq = Bus.control(s, 1).set(1.0);
+~sCwipe = Bus.control(s, 1).set(0.1);
+
 // dry synth
 ~x = Synth( \play, [ \amp, 0.99, \bufnum, ~bSamp, \effectsBus, ~bus.index, \thresh, 0.5, \trig, 1 ]);
 
 // wet and dry synth together
-~y = Synth.after(~x, \delay_blur, [ \amp, 0.9, \delaytime, 2, \glide, 200, \inBus, ~bus.index, \trig, 1 ] );
+~y = Synth.after(~x, \delay_blur, [ \amp, ~dbAmp.asMap, \delaytime, ~dbDelaytime.asMap, \glide, 200, \inBus, ~bus.index, \trig, ~dbTrig.asMap ] );
 
-// choppy control busses
-~amp = Bus.control(s, 1).set(0.0);
-~dur = Bus.control(s, 1).set(1.0);
-~freq = Bus.control(s, 1).set(1.0);
-~cwipe = Bus.control(s, 1).set(0.1);
 )
 
 
@@ -88,12 +94,14 @@ SynthDef( \scramble, { | amp = 0.0, cwipe, cwidth, dur = 2, freq = 1.0, glide = 
 CCResponder({ |src, chan, num, val|
 	switch (num,
 		1, {
-			("delay_blur amp is" + val.linlin(0, 127, 0.0, 1.0 )).postln;
-			~y.set(\amp, val.linlin(0, 127, 0.0, 1.0 ));
+			e = val.linlin(0, 127, 0.0, 1.0 );
+			("delay_blur amp is" + e).postln;
+			~dbAmp.set(e);
 		},
 		11, {
-			("delay_blur dt is" + val.linlin(0, 127, 0.001, 2.0 )).postln;
-			~y.set(\delaytime, val.linlin(0, 127, 0.01, 6.0 ));
+			f = val.linlin(0, 127, 0.001, 2.0 );
+			("delay_blur dt is" + f).postln;
+			~dbDelaytime.set(f);
 		}
 
 	)
@@ -105,22 +113,22 @@ CCResponder({ |src, chan, num, val|
 		2, {
 			g = val.linlin(0, 127, 0.0, 1.0 );
 			("scramble amp is" + g).postln;
-			~amp.set(g);
+			~sAmp.set(g);
 		},
 		12, {
 			h = val.linlin( 0, 127, 0.9, 1.95);
 			("scramble freq is" + h).postln;
-			~freq.set(h);
+			~sFreq.set(h);
 		},
 		13, {
 			i = val.linlin(0, 127, 0.1, 0.95 );
 			("scramble wipe is " + i).postln;
-			~cwipe.set(i);
+			~sCwipe.set(i);
 		},
 		14, {
 			j = val.linlin(0, 127, 0.01, 6 );
 			("scramble dur is " + j).postln;
-			~dur.set(j);
+			~sDur.set(j);
 		},
 		15, {
 			k = val.linlin(0, 127, 0.001, 0.3 );
@@ -131,22 +139,23 @@ CCResponder({ |src, chan, num, val|
 });
 
 OSCFunc({|msg, time, addr |
+	var dur;
 	if( msg[3] == 1,
 		{
 		postln( "ONSET!! " );
-		Synth.new( \scramble, [ \amp, ~amp.asMap, \cwipe, ~cwipe.asMap, \dur, ~dur.asMap, \freq, ~freq.asMap, \trig, 1 ] );
+
+		~dbTrig.set(0); // turn off wet synth
+		dur = ~sDur.getSynchronous; // get dur of noise sound
+		postln("dur is " + dur); // just checking
+
+		Synth.new( \scramble, [ \amp, ~sAmp.asMap, \cwipe, ~sCwipe.asMap, \dur, ~sDur.asMap, \freq, ~sFreq.asMap, \trig, 1 ] ); // play the noise sound
+
+		SystemClock.sched(dur, { // restart the wet synth after dur has passed
+			~dbTrig.set(1);
+			});
 	});
 }, '/trigz');
 )
-
-
-// TO DO
-
-OSCFunc({
-// change someone's glide time
-});
-
-// glide is controlled by other people
 
 
 ///////// TEST THINGS /////////
