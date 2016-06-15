@@ -5,7 +5,7 @@
 TO DO
 1. can't get open dialogue snip from Scott to work
 2. Buffer.readChannels not working?
-2. replace PlayBuf with Hollis Frampton moving "window" thing (later)
+2. replace PlayBuf with Hollis Frampton moving "window" thing (after Friday)
 */
 
 s.options.memSize = 1048576;
