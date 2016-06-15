@@ -1,9 +1,11 @@
 // cuts
-// bitpanic dog star orchestra 12 06/17/16
+// bitpanic, dog star orchestra 12, 06/17/16
 
 /*
 TO DO
-1. CHOPPY TURNS FIELD RECORDING OFF (use systemclock.sched, get current dur of choppy from Bus.getSynchronous)
+1. can't get open dialogue snip from Scott to work
+2. Buffer.readChannels not working?
+2. replace PlayBuf with Hollis Frampton moving "window" thing (later)
 */
 
 s.options.memSize = 1048576;
@@ -15,12 +17,11 @@ s.boot;
 
 /* !!!!!!!!!! PUT YOUR SAMPLE'S FILEPATH IN ~bSamp (noisey or wind interferency samples work well, tone oriented stuff not so much!)*/
 
-~bSamp = Buffer.read(s, "/Volumes/MROTHERBACKUP/samples/elevatorMono.aif", action: { "sample read".postln });
+~bField = Buffer.read(s, "/Volumes/MROTHERBACKUP/samples/longbeach_recording_mono.wav", action: { "sample read".postln });
 
 ~fft_b1 = Buffer.alloc( s, 2048, 1, completionMessage: { "fft_b1 alloced".postln });
 ~fft_b2 = Buffer.alloc( s, 2048, 1, completionMessage: { "fft_b2 alloced".postln });
 )
-
 
 (
 
@@ -79,7 +80,7 @@ SynthDef( \scramble, { | amp = 0.0, cwipe, cwidth, dur = 2, freq = 1.0, glide = 
 ~sCwipe = Bus.control(s, 1).set(0.1);
 
 // dry synth
-~x = Synth( \play, [ \amp, 0.99, \bufnum, ~bSamp, \effectsBus, ~bus.index, \thresh, 0.5, \trig, 1 ]);
+~x = Synth( \play, [ \amp, 0.99, \bufnum, ~bField, \effectsBus, ~bus.index, \thresh, 0.5, \trig, 1 ]);
 
 // wet and dry synth together
 ~y = Synth.after(~x, \delay_blur, [ \amp, ~dbAmp.asMap, \delaytime, ~dbDelaytime.asMap, \glide, 200, \inBus, ~bus.index, \trig, ~dbTrig.asMap ] );
@@ -145,14 +146,13 @@ OSCFunc({|msg, time, addr |
 		postln( "ONSET!! " );
 
 		~dbTrig.set(0); // turn off wet synth
-		dur = ~sDur.getSynchronous; // get dur of noise sound
-		postln("dur is " + dur); // just checking
+		dur = ~sDur.getSynchronous; // get dur of noise sound to turn synth back on
 
 		Synth.new( \scramble, [ \amp, ~sAmp.asMap, \cwipe, ~sCwipe.asMap, \dur, ~sDur.asMap, \freq, ~sFreq.asMap, \trig, 1 ] ); // play the noise sound
 
-		SystemClock.sched(dur, { // restart the wet synth after dur has passed
+		SystemClock.sched(dur, {
 			~dbTrig.set(1);
-			});
+		});
 	});
 }, '/trigz');
 )
