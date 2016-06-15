@@ -49,7 +49,7 @@ SynthDef( \delay_blur, { | amp = 0.0, delaytime = 0.0, dur = 4.0, inBus, glide =
 }).add;
 
 
-SynthDef( \scramble, { | amp = 0.0, cwipe, cwidth, dur = 2, freq = 1.0, glide = 200 trig = 0 |
+SynthDef( \scramble, { | amp = 0.0, cwipe, cwidth, dur = 2, freq = 1.0, glide = 200, trig = 0 |
 	var sig, env, play;
 
 	env = EnvGen.kr( Env.linen( 0.001, dur, 0.1, amp ), trig, doneAction: 2 ); // not so sure about this envelope yet
