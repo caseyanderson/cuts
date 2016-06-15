@@ -45,7 +45,7 @@ SynthDef( \delay_blur, { | amp = 0.0, delaytime = 0.0, dur = 4.0, inBus, glide =
 	delay = DelayC.ar( in, maxDT, Lag.kr(delaytime, glide), amp, 0.6 );
 	env = EnvGen.kr( Env.asr( 0.01, amp, 0.01 ), trig, doneAction: 0 );
 	mix = Mix.new([ delay, in ]);
-	Out.ar( 0, env * mix * amp);
+	Out.ar( 1, env * mix * amp);
 }).add;
 
 
@@ -55,7 +55,7 @@ SynthDef( \scramble, { | amp = 0.0, cwipe, cwidth, dur = 2, freq = 1.0, glide = 
 	env = EnvGen.kr( Env.linen( 0.001, dur, 0.1, amp ), trig, doneAction: 2 ); // not so sure about this envelope yet
 	sig = Crackle.ar( Lag.kr( freq, glide), amp );
 	play = IFFT( PV_BinScramble( FFT( ~fft_b2, sig ), Lag.kr( cwipe, glide), 0.1, 0.5 ) ) * env;
-	Out.ar( 0, env * play);
+	Out.ar( 1, env * play);
 }).add;
 
 )
