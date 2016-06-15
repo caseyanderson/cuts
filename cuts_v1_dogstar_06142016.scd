@@ -15,7 +15,7 @@ s.boot;
 (
 ///////// SETUP BUFFERS /////////
 
-/* !!!!!!!!!! PUT YOUR SAMPLE'S FILEPATH IN ~bSamp (noisey or wind interferency samples work well, tone oriented stuff not so much!)*/
+/* !!!!!!!!!! PUT YOUR SAMPLE'S FILEPATH IN ~bField (noisey or wind interferency samples work well, tone oriented stuff not so much!)*/
 
 ~bField = Buffer.read(s, "/Volumes/MROTHERBACKUP/samples/longbeach_recording_mono.wav", action: { "sample read".postln });
 
