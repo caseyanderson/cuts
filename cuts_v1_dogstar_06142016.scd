@@ -3,9 +3,11 @@
 
 /*
 TO DO
-1. can't get open dialogue snip from Scott to work
-2. Buffer.readChannels not working?
-2. replace PlayBuf with Hollis Frampton moving "window" thing (after Friday)
+1. replace PlayBuf with Hollis Frampton moving "window" thing (after Friday)
+2. change delay_blur name to field
+3. change scramble name to noise
+4. change onset message to SWITCH
+5. check to make sure comments in post window match naming convention throughout the rest of patch
 */
 
 s.options.memSize = 1048576;
