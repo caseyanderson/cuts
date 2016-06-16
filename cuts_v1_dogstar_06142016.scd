@@ -13,15 +13,22 @@ s.boot;
 
 
 (
-///////// SETUP BUFFERS /////////
-
-/* !!!!!!!!!! PUT YOUR SAMPLE'S FILEPATH IN ~bField (noisey or wind interferency samples work well, tone oriented stuff not so much!)*/
-
-~bField = Buffer.read(s, "/Volumes/MROTHERBACKUP/samples/longbeach_recording_mono.wav", action: { "sample read".postln });
+Dialog.openPanel({ arg path;
+	// path.postln;
+~bField = Buffer.readChannel(s, path, channels: [0], action: { |buffer|
+"".postln;
+"Loaded: ".post;
+		// buffer.postln;
+path.postln;
+"Channels: ".post;
+buffer.numChannels.postln;
+});
 
 ~fft_b1 = Buffer.alloc( s, 2048, 1, completionMessage: { "fft_b1 alloced".postln });
 ~fft_b2 = Buffer.alloc( s, 2048, 1, completionMessage: { "fft_b2 alloced".postln });
+});
 )
+
 
 (
 
