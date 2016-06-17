@@ -13,6 +13,33 @@ TO DO
 s.options.memSize = 1048576;
 s.boot;
 
+(
+
+		var setBroadcastAddress = {
+			var hostIPAddress = NetAddr.myIP,
+				broadcastAddress = "";
+
+			var broadcastAddressSplit = hostIPAddress.split($\.);
+			broadcastAddressSplit.put(3,"255");
+
+			// Concatenate the results together
+			broadcastAddressSplit.do({|item, i|
+				if(i > 0, {
+					broadcastAddress = broadcastAddress ++  "." ++ item;
+					}, {
+					// first member of IP address doesn't need to have a dot attached to it
+					broadcastAddress = item;
+					})
+				});
+
+			NetAddr.broadcastFlag = true;
+
+			~broadcastAddr = NetAddr.new(broadcastAddress, 57120);
+		};
+
+		setBroadcastAddress.value();
+)
+
 
 (
 Dialog.openPanel({ arg path;
@@ -77,6 +104,9 @@ SynthDef( \scramble, { | amp = 0.0, cwipe, cwidth, dur = 2, freq = 1.0, glide = 
 // the audio bus
 ~bus = Bus.audio(s, 1 );
 
+// glide time
+~glide = Bus.control(s, 1).set(200);
+
 // wet synth controls
 ~dbAmp = Bus.control(s, 1).set(0.0);
 ~dbDelaytime = Bus.control(s, 1).set(2);
@@ -89,10 +119,10 @@ SynthDef( \scramble, { | amp = 0.0, cwipe, cwidth, dur = 2, freq = 1.0, glide = 
 ~sCwipe = Bus.control(s, 1).set(0.1);
 
 // dry synth
-~x = Synth( \play, [ \amp, 0.99, \bufnum, ~bField, \effectsBus, ~bus.index, \thresh, 0.5, \trig, 1 ]);
+~x = Synth( \play, [ \amp, 0.99, \bufnum, ~bField, \effectsBus, ~bus.index, \glide, ~glide.asMap, \thresh, 0.5, \trig, 1 ]);
 
 // wet and dry synth together
-~y = Synth.after(~x, \delay_blur, [ \amp, ~dbAmp.asMap, \delaytime, ~dbDelaytime.asMap, \glide, 200, \inBus, ~bus.index, \trig, ~dbTrig.asMap ] );
+~y = Synth.after(~x, \delay_blur, [ \amp, ~dbAmp.asMap, \delaytime, ~dbDelaytime.asMap, , \glide, ~glide.asMap, \inBus, ~bus.index, \trig, ~dbTrig.asMap ] );
 
 )
 
@@ -164,6 +194,12 @@ OSCFunc({|msg, time, addr |
 		});
 	});
 }, '/trigz');
+
+OSCFunc({|msg, time, addr |
+
+	("NEW GLIDE IS " + msg[1]).postln;
+	~glide.set(msg[1]);
+}, '/dwingus');
 )
 
 
