@@ -122,7 +122,7 @@ SynthDef( \scramble, { | amp = 0.0, cwipe, cwidth, dur = 2, freq = 1.0, glide = 
 ~x = Synth( \play, [ \amp, 0.99, \bufnum, ~bField, \effectsBus, ~bus.index, \glide, ~glide.asMap, \thresh, 0.5, \trig, 1 ]);
 
 // wet and dry synth together
-~y = Synth.after(~x, \delay_blur, [ \amp, ~dbAmp.asMap, \delaytime, ~dbDelaytime.asMap, , \glide, ~glide.asMap, \inBus, ~bus.index, \trig, ~dbTrig.asMap ] );
+~y = Synth.after(~x, \delay_blur, [ \amp, ~dbAmp.asMap, \delaytime, ~dbDelaytime.asMap, \glide, ~glide.asMap, \inBus, ~bus.index, \trig, ~dbTrig.asMap ] );
 
 )
 
@@ -195,11 +195,11 @@ OSCFunc({|msg, time, addr |
 	});
 }, '/trigz');
 
-OSCFunc({|msg, time, addr |
+/*OSCFunc({|msg, time, addr |
 
 	("NEW GLIDE IS " + msg[1]).postln;
 	~glide.set(msg[1]);
-}, '/dwingus');
+}, '/dwingus');*/
 )
 
 
